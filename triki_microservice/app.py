@@ -4,18 +4,22 @@ import uuid
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
-app = Flask(__name__)
-CORS(app) # Enable CORS for all routes
+# triki_microservice/app.py
+import os
+import uuid
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
+
+# Determinamos la ruta absoluta de la carpeta frontend
+# En Render, la estructura es /src/triki_microservice/app.py y /src/web_frontend/
+current_dir = os.path.dirname(os.path.abspath(__file__))
+frontend_dir = os.path.abspath(os.path.join(current_dir, '..', 'web_frontend'))
+
+app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
+CORS(app) 
 
 # In-memory store for active games
 games = {}
-
-# Construct the path to the web_frontend directory
-frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'web_frontend'))
-
-# Re-configure app with static folder settings correctly
-app.static_folder = frontend_dir
-app.static_url_path = ''
 
 class TrikiGameLogic:
     def __init__(self):
