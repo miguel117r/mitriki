@@ -1,0 +1,97 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+    background-color: #555;
+    margin: 0;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 0;
+    display: inline-block;
+}
+
+nav ul li a:hover {
+    background-color: #777;
+}
+
+main {
+    padding: 20px;
+    text-align: center;
+}
+
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1rem 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Triki game specific styles */
+.triki-board {
+    border-collapse: collapse;
+    margin: 20px auto; /* Centers the board */
+    display: inline-block; /* To allow auto margin to center it */
+}
+
+.triki-board td {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #333;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 3em;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #eee;
+}
+
+.triki-board td:hover {
+    background-color: #ddd;
+}
+
+.triki-board td.player-x {
+    color: #e74c3c; /* Red */
+}
+
+.triki-board td.player-o {
+    color: #3498db; /* Blue */
+}
+
+#game-status {
+    margin-top: 10px;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+#new-game-button {
+    padding: 10px 20px;
+    font-size: 1.2em;
+    cursor: pointer;
+    margin-top: 20px;
+}

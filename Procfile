@@ -1,0 +1,1 @@
+web: gunicorn --chdir triki_microservice app:app

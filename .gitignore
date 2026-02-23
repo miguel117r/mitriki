@@ -1,0 +1,16 @@
+# Python temporales
+__pycache__/
+*.py[cod]
+*$py.class
+vcl/
+env/
+venv/
+.env
+
+# Windows temporales
+Thumbs.db
+desktop.ini
+
+# Node/Frontend (por si acaso)
+node_modules/
+.DS_Store
