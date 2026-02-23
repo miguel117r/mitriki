@@ -8,6 +8,7 @@ let pollingInterval = null;
 
 document.getElementById('btn-create').onclick = createRoom;
 document.getElementById('btn-join').onclick = joinRoom;
+document.getElementById('btn-restart').onclick = restartGame;
 
 async function createRoom() {
     const res = await fetch(`${API_BASE}/create_room`, { method: 'POST' });
@@ -30,6 +31,12 @@ async function joinRoom() {
     }
 }
 
+async function restartGame() {
+    if (!roomId) return;
+    await fetch(`${API_BASE}/${roomId}/restart`, { method: 'POST' });
+    document.getElementById('btn-restart').style.display = 'none';
+}
+
 function setupGame(data) {
     roomId = data.room_id;
     playerId = data.player_id;
@@ -46,19 +53,28 @@ async function startPolling() {
 
 async function fetchState() {
     if (!roomId || !playerId) return;
-    const res = await fetch(`${API_BASE}/${roomId}/state/${playerId}`);
-    const state = await res.json();
-    renderBoard(state.board);
-    
-    isMyTurn = state.turn === role && state.players_count === 2;
-    
-    if (state.players_count < 2) {
-        updateStatus("Esperando oponente...");
-    } else if (state.game_over) {
-        updateStatus(state.winner ? `¡GANADOR: ${state.winner}! 🎉` : "¡EMPATE! 🤝");
-        clearInterval(pollingInterval);
-    } else {
-        updateStatus(isMyTurn ? "TU TURNO ⚡" : "Esperando movimiento...");
+    try {
+        const res = await fetch(`${API_BASE}/${roomId}/state/${playerId}`);
+        const state = await res.json();
+        renderBoard(state.board);
+        
+        if (state.scores) {
+            document.getElementById('score-display').textContent = `X: ${state.scores.X} | O: ${state.scores.O}`;
+        }
+
+        isMyTurn = state.turn === role && state.players_count === 2;
+        
+        if (state.players_count < 2) {
+            updateStatus("Esperando oponente...");
+        } else if (state.game_over) {
+            updateStatus(state.winner ? `¡GANADOR: ${state.winner}! 🎉` : "¡EMPATE! 🤝");
+            document.getElementById('btn-restart').style.display = 'inline-block';
+        } else {
+            document.getElementById('btn-restart').style.display = 'none';
+            updateStatus(isMyTurn ? "TU TURNO ⚡" : "Esperando movimiento...");
+        }
+    } catch (e) {
+        console.log("Error consultando estado");
     }
 }
 

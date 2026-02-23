@@ -18,6 +18,13 @@ class TrikiOnline:
         self.current_turn = "X"
         self.game_over = False
         self.winner = None
+        self.scores = {"X": 0, "O": 0}
+
+    def restart(self):
+        self.board = [["" for _ in range(3)] for _ in range(3)]
+        self.current_turn = "X"
+        self.game_over = False
+        self.winner = None
 
     def add_player(self, player_id):
         if len(self.players) >= 2: return None
@@ -32,6 +39,7 @@ class TrikiOnline:
         self.board[row][col] = player_role
         if self._check_winner(player_role):
             self.game_over, self.winner = True, player_role
+            self.scores[player_role] += 1
         elif all(self.board[i][j] != "" for i in range(3) for j in range(3)):
             self.game_over = True
         else:
@@ -50,17 +58,25 @@ class TrikiOnline:
             "role": self.players.get(player_id),
             "players_count": len(self.players),
             "game_over": self.game_over,
-            "winner": self.winner
+            "winner": self.winner,
+            "scores": self.scores
         }
 
 # --- Rutas Triki Online ---
 @app.route('/api/triki/create_room', methods=['POST'])
+# ... (create_room)
 def create_room():
-    room_id = str(random.randint(1000, 9999)) # Código de 4 dígitos para fácil acceso
+    room_id = str(random.randint(1000, 9999))
     player_id = str(uuid.uuid4())
     games[room_id] = TrikiOnline()
     role = games[room_id].add_player(player_id)
     return jsonify({"room_id": room_id, "player_id": player_id, "role": role}), 201
+
+@app.route('/api/triki/<room_id>/restart', methods=['POST'])
+def online_restart(room_id):
+    g = games.get(room_id)
+    if g: g.restart()
+    return jsonify({"status": "restarted"}), 200
 
 @app.route('/api/triki/join_room', methods=['POST'])
 def join_room():
