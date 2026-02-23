@@ -133,6 +133,14 @@ def mine_flag(gid):
     g.toggle_flag(data.get('row'), data.get('col'))
     return jsonify(g.get_state()), 200
 
+# --- Rutas de Pong (Registro de puntuaciones) ---
+@app.route('/api/pong/score', methods=['POST'])
+def pong_score():
+    data = request.json
+    # Por ahora solo confirmamos la recepción, podrías guardarlo en una DB después
+    print(f"Puntuación recibida: {data}")
+    return jsonify({"status": "Puntuación registrada"}), 200
+
 # Rutas de archivos estáticos
 @app.route('/')
 def serve_index():
