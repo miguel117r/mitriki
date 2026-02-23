@@ -1,1 +1,1 @@
-web: gunicorn --chdir triki_microservice app:app
+web: gunicorn --chdir triki_microservice --bind 0.0.0.0:$PORT app:app

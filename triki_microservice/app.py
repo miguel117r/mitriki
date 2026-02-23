@@ -8,16 +8,14 @@ app = Flask(__name__)
 CORS(app) # Enable CORS for all routes
 
 # In-memory store for active games
-# In a real application, this would be a database or a distributed cache
 games = {}
 
 # Construct the path to the web_frontend directory
-# Assumes web_frontend and triki_microservice are siblings in the same parent directory
 frontend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'web_frontend'))
 
-# Configure Flask to serve static files from the web_frontend directory
-app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
-CORS(app) # Enable CORS for all routes
+# Re-configure app with static folder settings correctly
+app.static_folder = frontend_dir
+app.static_url_path = ''
 
 class TrikiGameLogic:
     def __init__(self):
