@@ -4,24 +4,32 @@ import random
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
-app = Flask(__name__, static_folder='web_frontend', static_url_path='')
+# Configuración de rutas absoluta para Render
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FRONTEND_DIR = os.path.join(BASE_DIR, 'web_frontend')
+
+app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path='')
 CORS(app) 
 
+# Diccionario de partidas en memoria
 games = {}
 
-# --- Lógica de Triki Online ---
+# --- CLASES DE LÓGICA ---
 class TrikiOnline:
-    def __init__(self):
+    def __init__(self, mode='pvp'):
         self.board = [["" for _ in range(3)] for _ in range(3)]
-        self.players = {} # { 'player_id': 'X' or 'O' }
+        self.players = {}
         self.current_turn = "X"
         self.game_over = False
         self.winner = None
+        self.mode = mode
         self.scores = {"X": 0, "O": 0}
 
     def restart(self):
         self.board = [["" for _ in range(3)] for _ in range(3)]
-        self.current_turn = "X"; self.game_over = False; self.winner = None
+        self.current_turn = "X"
+        self.game_over = False
+        self.winner = None
 
     def add_player(self, player_id):
         if len(self.players) >= 2: return None
@@ -35,8 +43,10 @@ class TrikiOnline:
         if self._check_winner(role):
             self.game_over, self.winner = True, role
             self.scores[role] += 1
-        elif all(self.board[i][j] != "" for i in range(3) for j in range(3)): self.game_over = True
-        else: self.current_turn = "O" if role == "X" else "X"
+        elif all(self.board[i][j] != "" for i in range(3) for j in range(3)):
+            self.game_over = True
+        else:
+            self.current_turn = "O" if role == "X" else "X"
         return True
 
     def _check_winner(self, p):
@@ -45,9 +55,12 @@ class TrikiOnline:
         return all(self.board[i][i] == p for i in range(3)) or all(self.board[i][2-i] == p for i in range(3))
 
     def get_state(self, player_id):
-        return {"board": self.board, "turn": self.current_turn, "role": self.players.get(player_id), "players_count": len(self.players), "game_over": self.game_over, "winner": self.winner, "scores": self.scores}
+        return {
+            "board": self.board, "turn": self.current_turn, "role": self.players.get(player_id),
+            "players_count": len(self.players), "game_over": self.game_over, 
+            "winner": self.winner, "scores": self.scores
+        }
 
-# --- Lógica de Buscaminas ---
 class MinesweeperGameLogic:
     def __init__(self, rows=10, cols=10, mines=15):
         self.rows, self.cols, self.mines_count = rows, cols, mines
@@ -59,9 +72,12 @@ class MinesweeperGameLogic:
 
     def reveal(self, r, c):
         if self.game_over or self.visible[r][c] != "hidden": return False
-        if (r, c) in self.mines: self.game_over, self.visible[r][c] = True, "revealed"; return True
+        if (r, c) in self.mines:
+            self.game_over, self.visible[r][c] = True, "revealed"
+            return True
         self._recursive_reveal(r, c)
-        if sum(row.count("hidden") for row in self.visible) == self.mines_count: self.game_over, self.winner = True, True
+        if sum(row.count("hidden") for row in self.visible) == self.mines_count:
+            self.game_over, self.winner = True, True
         return True
 
     def _recursive_reveal(self, r, c):
@@ -79,12 +95,17 @@ class MinesweeperGameLogic:
             elif self.visible[r][c] == "flagged": self.visible[r][c] = "hidden"
 
     def get_state(self):
-        return {"visible": self.visible, "values": [[self.board[r][c] if self.visible[r][c] == "revealed" else "" for c in range(self.cols)] for r in range(self.rows)], "game_over": self.game_over, "winner": self.winner, "rows": self.rows, "cols": self.cols}
+        return {
+            "visible": self.visible, "game_over": self.game_over, "winner": self.winner,
+            "values": [[self.board[r][c] if self.visible[r][c] == "revealed" else "" for c in range(self.cols)] for r in range(self.rows)],
+            "rows": self.rows, "cols": self.cols
+        }
 
-# --- Rutas API ---
+# --- RUTAS API ---
 @app.route('/api/triki/create_room', methods=['POST'])
 def create_room():
-    rid = str(random.randint(1000, 9999)); pid = str(uuid.uuid4()); games[rid] = TrikiOnline()
+    rid = str(random.randint(1000, 9999)); pid = str(uuid.uuid4())
+    games[rid] = TrikiOnline()
     role = games[rid].add_player(pid)
     return jsonify({"room_id": rid, "player_id": pid, "role": role}), 201
 
@@ -98,12 +119,14 @@ def join_room():
 @app.route('/api/triki/<rid>/move', methods=['POST'])
 def triki_move(rid):
     g = games.get(rid); d = request.json
-    success = g.make_move(d['row'], d['col'], d['role'])
-    return jsonify(g.get_state(d['player_id'])), 200 if success else 400
+    if not g: return jsonify({"error": "No"}), 404
+    g.make_move(d.get('row'), d.get('col'), d.get('role'))
+    return jsonify(g.get_state(d.get('player_id'))), 200
 
 @app.route('/api/triki/<rid>/state/<pid>', methods=['GET'])
 def triki_state(rid, pid):
-    g = games.get(rid); return jsonify(g.get_state(pid)) if g else (jsonify({"error": "No"}), 404)
+    g = games.get(rid)
+    return jsonify(g.get_state(pid)) if g else (jsonify({"error": "No"}), 404)
 
 @app.route('/api/triki/<rid>/restart', methods=['POST'])
 def triki_restart(rid):
@@ -118,18 +141,22 @@ def mine_new():
 @app.route('/api/minesweeper/<gid>/reveal', methods=['POST'])
 def mine_reveal(gid):
     g = games.get(gid); d = request.json
-    if g: g.reveal(d['row'], d['col'])
+    if g: g.reveal(d.get('row'), d.get('col'))
     return jsonify(g.get_state()) if g else ({}, 404)
 
 @app.route('/api/snake/score', methods=['POST'])
 def snake_score():
-    print(f"Snake Score: {request.json}"); return jsonify({"status": "ok"}), 200
+    return jsonify({"status": "ok"}), 200
 
+# --- ARCHIVOS ESTÁTICOS ---
 @app.route('/')
-def index(): return send_from_directory('web_frontend', 'index.html')
+def index():
+    return send_from_directory(FRONTEND_DIR, 'index.html')
 
 @app.route('/<path:path>')
-def static_files(path): return send_from_directory('web_frontend', path)
+def static_files(path):
+    return send_from_directory(FRONTEND_DIR, path)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)))
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
