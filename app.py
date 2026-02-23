@@ -7,7 +7,7 @@ from flask_cors import CORS
 
 # Rutas absolutas
 current_dir = os.path.dirname(os.path.abspath(__file__))
-frontend_dir = os.path.abspath(os.path.join(current_dir, '..', 'web_frontend'))
+frontend_dir = os.path.join(current_dir, 'web_frontend')
 
 # Configuramos Flask para que sirva TODO desde web_frontend automáticamente
 app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
