@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tres en Línea (Triki)</title>
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .mode-selector { margin-bottom: 20px; }
+        button { padding: 10px 20px; cursor: pointer; margin: 0 5px; }
+        .triki-board td { width: 80px; height: 80px; text-align: center; font-size: 40px; border: 1px solid #333; cursor: pointer; }
+        .player-x { color: blue; }
+        .player-o { color: red; }
+    </style>
 </head>
 <body>
     <header>
@@ -14,16 +21,19 @@
         <a href="../index.html">Volver al Menú Principal</a>
     </nav>
     <main>
-        <div id="game-status"></div>
+        <div class="mode-selector">
+            <button id="btn-ia">vs IA</button>
+            <button id="btn-pvp">vs Jugador 2 (Local)</button>
+        </div>
+        <div id="game-status">Selecciona un modo para jugar</div>
         <div id="triki-board-container">
             <!-- El tablero de Triki se renderizará aquí mediante JavaScript -->
         </div>
-        <button id="new-game-button">Nueva Partida</button>
+        <button id="new-game-button" style="display:none;">Nueva Partida</button>
     </main>
     <footer>
         <p>&copy; 2026 Multi-Juego</p>
     </footer>
     <script src="../js/script.js"></script>
-    <!-- Script específico para Triki, si es necesario, iría aquí -->
 </body>
 </html>

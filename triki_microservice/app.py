@@ -16,26 +16,49 @@ games = {}
 
 # --- Lógica de Triki ---
 class TrikiGameLogic:
-    def __init__(self):
+    def __init__(self, mode='pvp'):
         self.board = [["" for _ in range(3)] for _ in range(3)]
         self.current_player = "X"
         self.game_over = False
         self.winner = None
+        self.mode = mode # 'pvp' o 'ia'
 
     def make_move(self, row, col, player):
         if self.game_over: return False, "Game over."
         if player != self.current_player: return False, "Not your turn."
         if self.board[row][col] != "": return False, "Cell taken."
+        
         self.board[row][col] = player
         if self._check_winner(player):
             self.game_over = True
             self.winner = player
             return True, f"Player {player} wins!"
-        elif all(self.board[i][j] != "" for i in range(3) for j in range(3)):
+        
+        if all(self.board[i][j] != "" for i in range(3) for j in range(3)):
             self.game_over = True
             return True, "Draw!"
+
         self.current_player = "O" if player == "X" else "X"
+
+        # Si es modo IA y ahora le toca a 'O', la IA mueve automáticamente
+        if self.mode == 'ia' and self.current_player == "O" and not self.game_over:
+            self._ai_move()
+            
         return True, "Success"
+
+    def _ai_move(self):
+        # IA Simple: Busca la primera celda vacía (puedes mejorarla luego)
+        empty_cells = [(r, c) for r in range(3) for c in range(3) if self.board[r][c] == ""]
+        if empty_cells:
+            r, c = random.choice(empty_cells)
+            self.board[r][c] = "O"
+            if self._check_winner("O"):
+                self.game_over = True
+                self.winner = "O"
+            elif all(self.board[i][j] != "" for i in range(3) for j in range(3)):
+                self.game_over = True
+            else:
+                self.current_player = "X"
 
     def _check_winner(self, p):
         for i in range(3):
@@ -93,8 +116,10 @@ class MinesweeperGameLogic:
 # --- Rutas API ---
 @app.route('/api/triki/new_game', methods=['POST'])
 def triki_new():
+    data = request.json or {}
+    mode = data.get('mode', 'pvp')
     gid = str(uuid.uuid4())
-    games[gid] = TrikiGameLogic()
+    games[gid] = TrikiGameLogic(mode=mode)
     return jsonify({"game_id": gid, "initial_state": games[gid].get_state()}), 201
 
 @app.route('/api/triki/<gid>/state', methods=['GET'])
