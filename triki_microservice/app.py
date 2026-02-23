@@ -1,26 +1,19 @@
 # triki_microservice/app.py
 import os
 import uuid
+import random
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
-# triki_microservice/app.py
-import os
-import uuid
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
-
-# Determinamos la ruta absoluta de la carpeta frontend
-# En Render, la estructura es /src/triki_microservice/app.py y /src/web_frontend/
 current_dir = os.path.dirname(os.path.abspath(__file__))
 frontend_dir = os.path.abspath(os.path.join(current_dir, '..', 'web_frontend'))
 
 app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
 CORS(app) 
 
-# In-memory store for active games
 games = {}
 
+# --- Lógica de Triki ---
 class TrikiGameLogic:
     def __init__(self):
         self.board = [["" for _ in range(3)] for _ in range(3)]
@@ -29,109 +22,113 @@ class TrikiGameLogic:
         self.winner = None
 
     def make_move(self, row, col, player):
-        if self.game_over:
-            return False, "Game is over."
-        if player != self.current_player:
-            return False, "It's not your turn."
-        if not (0 <= row < 3 and 0 <= col < 3):
-            return False, "Invalid move: Out of bounds."
-        if self.board[row][col] != "":
-            return False, "Invalid move: Cell already taken."
-
+        if self.game_over: return False, "Game over."
+        if player != self.current_player: return False, "Not your turn."
+        if self.board[row][col] != "": return False, "Cell taken."
         self.board[row][col] = player
-        
         if self._check_winner(player):
             self.game_over = True
             self.winner = player
             return True, f"Player {player} wins!"
-        elif self._check_draw():
+        elif all(self.board[i][j] != "" for i in range(3) for j in range(3)):
             self.game_over = True
-            return True, "It's a draw!"
-        else:
-            self.current_player = "O" if player == "X" else "X"
-            return True, "Move successful."
+            return True, "Draw!"
+        self.current_player = "O" if player == "X" else "X"
+        return True, "Success"
 
-    def _check_winner(self, player):
-        # Check rows
+    def _check_winner(self, p):
         for i in range(3):
-            if all(self.board[i][j] == player for j in range(3)):
-                return True
-        # Check columns
-        for j in range(3):
-            if all(self.board[i][j] == player for i in range(3)):
-                return True
-        # Check diagonals
-        if all(self.board[i][i] == player for i in range(3)):
-            return True
-        if all(self.board[i][2 - i] == player for i in range(3)):
-            return True
+            if all(self.board[i][j] == p for j in range(3)) or all(self.board[j][i] == p for j in range(3)): return True
+        if all(self.board[i][i] == p for i in range(3)) or all(self.board[i][2-i] == p for i in range(3)): return True
         return False
 
-    def _check_draw(self):
-        return all(self.board[i][j] != "" for i in range(3) for j in range(3)) and not self.winner
+    def get_state(self):
+        return {"board": self.board, "current_player": self.current_player, "game_over": self.game_over, "winner": self.winner}
+
+# --- Lógica de Buscaminas ---
+class MinesweeperGameLogic:
+    def __init__(self, rows=10, cols=10, mines=15):
+        self.rows, self.cols, self.mines_count = rows, cols, mines
+        self.board = [["" for _ in range(cols)] for _ in range(rows)]
+        self.visible = [["hidden" for _ in range(cols)] for _ in range(rows)]
+        self.mines = set(random.sample([(r, c) for r in range(rows) for c in range(cols)], mines))
+        for r, c in self.mines: self.board[r][c] = "M"
+        self.game_over = False
+        self.winner = False
+
+    def reveal(self, r, c):
+        if self.game_over or self.visible[r][c] != "hidden": return False
+        if (r, c) in self.mines:
+            self.game_over = True
+            self.visible[r][c] = "revealed"
+            return True
+        self._recursive_reveal(r, c)
+        if sum(row.count("hidden") for row in self.visible) == self.mines_count:
+            self.game_over, self.winner = True, True
+        return True
+
+    def _recursive_reveal(self, r, c):
+        if not (0 <= r < self.rows and 0 <= c < self.cols) or self.visible[r][c] != "hidden": return
+        adj = sum(1 for dr in [-1,0,1] for dc in [-1,0,1] if (r+dr, c+dc) in self.mines)
+        self.visible[r][c] = "revealed"
+        self.board[r][c] = str(adj)
+        if adj == 0:
+            for dr in [-1,0,1]:
+                for dc in [-1,0,1]:
+                    if dr != 0 or dc != 0: self._recursive_reveal(r+dr, c+dc)
+
+    def toggle_flag(self, r, c):
+        if self.game_over: return
+        if self.visible[r][c] == "hidden": self.visible[r][c] = "flagged"
+        elif self.visible[r][c] == "flagged": self.visible[r][c] = "hidden"
 
     def get_state(self):
         return {
-            "board": self.board,
-            "current_player": self.current_player,
-            "game_over": self.game_over,
-            "winner": self.winner
+            "visible": self.visible,
+            "values": [[self.board[r][c] if self.visible[r][c] == "revealed" else "" for c in range(self.cols)] for r in range(self.rows)],
+            "game_over": self.game_over, "winner": self.winner, "rows": self.rows, "cols": self.cols
         }
 
-# API Endpoints
+# --- Rutas API ---
 @app.route('/api/triki/new_game', methods=['POST'])
-def new_game():
-    game_id = str(uuid.uuid4())
-    games[game_id] = TrikiGameLogic()
-    return jsonify({"game_id": game_id, "initial_state": games[game_id].get_state()}), 201
+def triki_new():
+    gid = str(uuid.uuid4()); games[gid] = TrikiGameLogic()
+    return jsonify({"game_id": gid, "initial_state": games[gid].get_state()}), 201
 
-@app.route('/api/triki/<game_id>/state', methods=['GET'])
-def get_game_state(game_id):
-    game = games.get(game_id)
-    if not game:
-        return jsonify({"message": "Game not found"}), 404
-    return jsonify(game.get_state()), 200
+@app.route('/api/triki/<gid>/move', methods=['POST'])
+def triki_move(gid):
+    g = games.get(gid); data = request.json
+    success, msg = g.make_move(data['row'], data['col'], data['player'])
+    return jsonify({"message": msg, "new_state": g.get_state()}), 200 if success else 400
 
-@app.route('/api/triki/<game_id>/move', methods=['POST'])
-def make_move(game_id):
-    game = games.get(game_id)
-    if not game:
-        return jsonify({"message": "Game not found"}), 404
+@app.route('/api/minesweeper/new_game', methods=['POST'])
+def mine_new():
+    gid = str(uuid.uuid4()); games[gid] = MinesweeperGameLogic()
+    return jsonify({"game_id": gid, "initial_state": games[gid].get_state()}), 201
 
-    data = request.get_json()
-    row = data.get('row')
-    col = data.get('col')
-    player = data.get('player')
+@app.route('/api/minesweeper/<gid>/reveal', methods=['POST'])
+def mine_reveal(gid):
+    g = games.get(gid); data = request.json
+    g.reveal(data['row'], data['col'])
+    return jsonify(g.get_state()), 200
 
-    if row is None or col is None or player is None:
-        return jsonify({"message": "Missing row, col, or player in request"}), 400
+@app.route('/api/minesweeper/<gid>/flag', methods=['POST'])
+def mine_flag(gid):
+    g = games.get(gid); data = request.json
+    g.toggle_flag(data['row'], data['col'])
+    return jsonify(g.get_state()), 200
 
-    success, message = game.make_move(row, col, player)
-
-    if not success:
-        return jsonify({"message": message, "current_state": game.get_state()}), 400
-    
-    return jsonify({"message": message, "new_state": game.get_state()}), 200
-
-# Serve index.html from the root URL
 @app.route('/')
-def serve_index():
-    return send_from_directory(frontend_dir, 'index.html')
+def serve_index(): return send_from_directory(frontend_dir, 'index.html')
 
-# Serve game-specific HTML files (e.g., triki.html)
 @app.route('/games/<path:filename>')
-def serve_game_html(filename):
-    return send_from_directory(os.path.join(frontend_dir, 'games'), filename)
+def serve_game_html(filename): return send_from_directory(os.path.join(frontend_dir, 'games'), filename)
 
-# Serve CSS files
 @app.route('/css/<path:filename>')
-def serve_css(filename):
-    return send_from_directory(os.path.join(frontend_dir, 'css'), filename)
+def serve_css(filename): return send_from_directory(os.path.join(frontend_dir, 'css'), filename)
 
-# Serve JS files
 @app.route('/js/<path:filename>')
-def serve_js(filename):
-    return send_from_directory(os.path.join(frontend_dir, 'js'), filename)
+def serve_js(filename): return send_from_directory(os.path.join(frontend_dir, 'js'), filename)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=os.getenv("PORT", 5000))

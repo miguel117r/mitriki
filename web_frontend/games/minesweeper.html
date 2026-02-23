@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Juego - Buscaminas</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .mine-grid { display: grid; gap: 2px; background: #ccc; padding: 5px; margin: 20px auto; width: fit-content; }
+        .cell { width: 30px; height: 30px; background: #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; border: 1px solid #999; }
+        .cell.revealed { background: #fff; cursor: default; }
+        .cell.flagged { background: #ffeb3b; }
+        .cell.mine { background: #f44336; }
+        .cell.n1 { color: blue; } .cell.n2 { color: green; } .cell.n3 { color: red; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Buscaminas</h1>
+        <a href="../index.html">Volver al Menú</a>
+    </header>
+    <main>
+        <div id="game-status">Haz clic en "Nueva Partida" para empezar.</div>
+        <button id="new-game-button">Nueva Partida</button>
+        <div id="mine-board-container" class="mine-grid"></div>
+    </main>
+    <script src="../js/minesweeper.js"></script>
+</body>
+</html>
