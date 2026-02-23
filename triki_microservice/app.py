@@ -97,6 +97,12 @@ def triki_new():
     games[gid] = TrikiGameLogic()
     return jsonify({"game_id": gid, "initial_state": games[gid].get_state()}), 201
 
+@app.route('/api/triki/<gid>/state', methods=['GET'])
+def triki_state(gid):
+    g = games.get(gid)
+    if not g: return jsonify({"error": "Game not found"}), 404
+    return jsonify(g.get_state()), 200
+
 @app.route('/api/triki/<gid>/move', methods=['POST'])
 def triki_move(gid):
     g = games.get(gid)
