@@ -3,37 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tres en Línea (Triki)</title>
+    <title>Triki Online | Multi-Juego</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        .mode-selector { margin-bottom: 20px; }
-        button { padding: 10px 20px; cursor: pointer; margin: 0 5px; }
-        .triki-board td { width: 80px; height: 80px; text-align: center; font-size: 40px; border: 1px solid #333; cursor: pointer; }
-        .player-x { color: blue; }
-        .player-o { color: red; }
+        .online-controls { background: #161b22; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #30363d; }
+        input { padding: 10px; border-radius: 5px; border: 1px solid #30363d; background: #0b0e14; color: white; margin-right: 10px; width: 100px; text-align: center; font-size: 18px; }
+        .triki-board td { width: 100px; height: 100px; text-align: center; font-size: 50px; border: 2px solid #30363d; cursor: pointer; transition: 0.3s; }
+        .triki-board td:hover { background: #1c2128; }
+        .player-x { color: #00d4ff; text-shadow: 0 0 10px rgba(0,212,255,0.5); }
+        .player-o { color: #00ff88; text-shadow: 0 0 10px rgba(0,255,136,0.5); }
+        .info-panel { margin: 15px 0; font-family: 'Orbitron', sans-serif; font-size: 1.1rem; }
     </style>
 </head>
 <body>
     <header>
-        <h1>Tres en Línea (Triki)</h1>
+        <h1>Triki Online</h1>
+        <a href="../index.html" style="color: #4caf50;">Volver al Menú</a>
     </header>
-    <nav>
-        <a href="../index.html">Volver al Menú Principal</a>
-    </nav>
+
     <main>
-        <div class="mode-selector">
-            <button id="btn-ia">vs IA</button>
-            <button id="btn-pvp">vs Jugador 2 (Local)</button>
+        <div class="online-controls">
+            <button id="btn-create">Crear Sala</button>
+            <span style="margin: 0 15px; color: #8b949e;">O</span>
+            <input type="text" id="input-room" placeholder="Código">
+            <button id="btn-join">Unirse</button>
         </div>
-        <div id="game-status">Selecciona un modo para jugar</div>
-        <div id="triki-board-container">
-            <!-- El tablero de Triki se renderizará aquí mediante JavaScript -->
+
+        <div class="info-panel">
+            <div id="room-display" style="color: #00d4ff;">Sala: -</div>
+            <div id="role-display">Rol: -</div>
+            <div id="game-status">Crea o únete a una sala para jugar.</div>
         </div>
-        <button id="new-game-button" style="display:none;">Nueva Partida</button>
+
+        <div id="triki-board-container"></div>
     </main>
-    <footer>
-        <p>&copy; 2026 Multi-Juego</p>
-    </footer>
-    <script src="../js/script.js"></script>
+
+    <script src="../js/online-triki.js"></script>
 </body>
 </html>
