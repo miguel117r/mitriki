@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Juego - Snake Neón</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        #snake-container { display: flex; flex-direction: column; align-items: center; margin-top: 20px; }
+        canvas { background: #0b0e14; border: 3px solid #00ff88; box-shadow: 0 0 20px rgba(0, 255, 136, 0.2); max-width: 95%; height: auto; }
+        .score-panel { font-family: 'Orbitron', sans-serif; color: #00ff88; font-size: 24px; margin-bottom: 10px; }
+        .controls-hint { color: #8b949e; margin-top: 10px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Snake Neón</h1>
+        <a href="../index.html" style="color: #00d4ff;">Volver al Menú</a>
+    </header>
+    <main id="snake-container">
+        <div class="score-panel">Puntos: <span id="current-score">0</span> | Récord: <span id="high-score">0</span></div>
+        <canvas id="snakeCanvas" width="400" height="400"></canvas>
+        <button id="start-button" style="margin-top: 20px;">Empezar Juego</button>
+        <div class="controls-hint">PC: Flechas | Celular: Desliza el dedo</div>
+    </main>
+    <script src="../js/snake.js"></script>
+</body>
+</html>
