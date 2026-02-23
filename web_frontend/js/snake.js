@@ -55,11 +55,13 @@ startButton.onclick = startGame;
 function startGame() {
     score = 0;
     scoreElement.textContent = score;
+    document.getElementById('game-status').textContent = "¡Buena suerte!";
+    document.getElementById('game-status').style.color = "#00ff88";
     snake = [{x: 10, y: 10}];
     nextDx = 1; nextDy = 0;
     placeFood();
     if (gameInterval) clearInterval(gameInterval);
-    gameInterval = setInterval(gameLoop, 100);
+    gameInterval = setInterval(gameLoop, 130); // Velocidad reducida
     startButton.style.display = 'none';
 }
 
@@ -98,17 +100,24 @@ function placeFood() {
 
 function gameOver() {
     clearInterval(gameInterval);
+    const status = document.getElementById('game-status');
     if (score > highScore) {
         highScore = score;
         localStorage.setItem('snakeHighScore', highScore);
         highScoreElement.textContent = highScore;
-        fetch('/api/snake/score', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({score: highScore})
-        });
+        status.textContent = `¡NUEVO RÉCORD: ${score}! 🏆`;
+        status.style.color = "#ffeb3b";
+    } else {
+        status.textContent = `GAME OVER - Puntos: ${score} 💀`;
+        status.style.color = "#f44336";
     }
-    alert(`Game Over! Puntos: ${score}`);
+    
+    fetch('/api/snake/score', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({score: score})
+    });
+
     startButton.style.display = 'block';
     startButton.textContent = 'Reintentar';
 }
