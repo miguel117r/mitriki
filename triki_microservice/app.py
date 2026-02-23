@@ -5,6 +5,7 @@ import random
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
+# Configuración de rutas
 current_dir = os.path.dirname(os.path.abspath(__file__))
 frontend_dir = os.path.abspath(os.path.join(current_dir, '..', 'web_frontend'))
 
@@ -92,43 +93,58 @@ class MinesweeperGameLogic:
 # --- Rutas API ---
 @app.route('/api/triki/new_game', methods=['POST'])
 def triki_new():
-    gid = str(uuid.uuid4()); games[gid] = TrikiGameLogic()
+    gid = str(uuid.uuid4())
+    games[gid] = TrikiGameLogic()
     return jsonify({"game_id": gid, "initial_state": games[gid].get_state()}), 201
 
 @app.route('/api/triki/<gid>/move', methods=['POST'])
 def triki_move(gid):
-    g = games.get(gid); data = request.json
-    success, msg = g.make_move(data['row'], data['col'], data['player'])
+    g = games.get(gid)
+    if not g: return jsonify({"error": "Game not found"}), 404
+    data = request.json
+    success, msg = g.make_move(data.get('row'), data.get('col'), data.get('player'))
     return jsonify({"message": msg, "new_state": g.get_state()}), 200 if success else 400
 
 @app.route('/api/minesweeper/new_game', methods=['POST'])
 def mine_new():
-    gid = str(uuid.uuid4()); games[gid] = MinesweeperGameLogic()
+    gid = str(uuid.uuid4())
+    games[gid] = MinesweeperGameLogic()
     return jsonify({"game_id": gid, "initial_state": games[gid].get_state()}), 201
 
 @app.route('/api/minesweeper/<gid>/reveal', methods=['POST'])
 def mine_reveal(gid):
-    g = games.get(gid); data = request.json
-    g.reveal(data['row'], data['col'])
+    g = games.get(gid)
+    if not g: return jsonify({"error": "Game not found"}), 404
+    data = request.json
+    g.reveal(data.get('row'), data.get('col'))
     return jsonify(g.get_state()), 200
 
 @app.route('/api/minesweeper/<gid>/flag', methods=['POST'])
 def mine_flag(gid):
-    g = games.get(gid); data = request.json
-    g.toggle_flag(data['row'], data['col'])
+    g = games.get(gid)
+    if not g: return jsonify({"error": "Game not found"}), 404
+    data = request.json
+    g.toggle_flag(data.get('row'), data.get('col'))
     return jsonify(g.get_state()), 200
 
+# Rutas de archivos estáticos
 @app.route('/')
-def serve_index(): return send_from_directory(frontend_dir, 'index.html')
+def serve_index():
+    return send_from_directory(frontend_dir, 'index.html')
 
 @app.route('/games/<path:filename>')
-def serve_game_html(filename): return send_from_directory(os.path.join(frontend_dir, 'games'), filename)
+def serve_game_html(filename):
+    return send_from_directory(os.path.join(frontend_dir, 'games'), filename)
 
 @app.route('/css/<path:filename>')
-def serve_css(filename): return send_from_directory(os.path.join(frontend_dir, 'css'), filename)
+def serve_css(filename):
+    return send_from_directory(os.path.join(frontend_dir, 'css'), filename)
 
 @app.route('/js/<path:filename>')
-def serve_js(filename): return send_from_directory(os.path.join(frontend_dir, 'js'), filename)
+def serve_js(filename):
+    return send_from_directory(os.path.join(frontend_dir, 'js'), filename)
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=os.getenv("PORT", 5000))
+    # Usar puerto de Render o 5000 por defecto
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
