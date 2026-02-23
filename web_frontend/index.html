@@ -3,26 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Juego - Menú Principal</title>
+    <title>Multi-Juego | Portal Gamer</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <header>
-        <h1>Bienvenido a Multi-Juego</h1>
+        <h1>Multi-Juego</h1>
+        <p style="color: #8b949e; letter-spacing: 2px;">ELIGE TU DESAFÍO</p>
     </header>
+
     <nav>
-        <ul>
-            <li><a href="games/triki.html">Tres en Línea (Triki)</a></li>
-            <li><a href="games/minesweeper.html">Buscaminas</a></li>
-            <li><a href="games/pong.html">Pong</a></li>
-        </ul>
+        <div class="game-grid">
+            <!-- Tarjeta Triki -->
+            <a href="games/triki.html" class="game-card">
+                <h2>Triki</h2>
+                <p>El clásico Tres en Línea. Desafía a la IA o a un amigo en partidas rápidas de estrategia.</p>
+                <span class="play-button">Jugar Ahora</span>
+            </a>
+
+            <!-- Tarjeta Buscaminas -->
+            <a href="games/minesweeper.html" class="game-card">
+                <h2>Buscaminas</h2>
+                <p>Pon a prueba tu lógica y suerte. Encuentra todas las minas sin hacer explotar el tablero.</p>
+                <span class="play-button">Explorar Campo</span>
+            </a>
+
+            <!-- Tarjeta Pong -->
+            <a href="games/pong.html" class="game-card">
+                <h2>Pong</h2>
+                <p>Acción arcade pura. El primero en llegar a 10 puntos gana. ¿Podrás vencer a la computadora?</p>
+                <span class="play-button">Entrar a la Arena</span>
+            </a>
+        </div>
     </nav>
+
     <main>
-        <p>Selecciona un juego del menú superior para comenzar.</p>
+        <p style="text-align: center; color: #484f58; font-style: italic;">
+            Selecciona un juego de arriba para comenzar tu experiencia.
+        </p>
     </main>
+
     <footer>
-        <p>&copy; 2026 Multi-Juego</p>
+        <p>&copy; 2026 Multi-Juego | Desarrollado con ❤️ para la comunidad gamer.</p>
     </footer>
-    <script src="js/script.js"></script>
 </body>
 </html>

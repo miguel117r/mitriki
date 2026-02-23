@@ -1,97 +1,139 @@
-body {
-    font-family: Arial, sans-serif;
+/* web_frontend/css/style.css */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+
+:root {
+    --bg-color: #0b0e14;
+    --card-bg: #161b22;
+    --accent-color: #00ff88;
+    --secondary-accent: #00d4ff;
+    --text-color: #e6edf3;
+    --neon-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+}
+
+* {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 header {
-    background-color: #333;
-    color: #fff;
-    padding: 1rem 0;
+    background: linear-gradient(135deg, #161b22 0%, #0b0e14 100%);
+    padding: 2rem;
     text-align: center;
+    border-bottom: 2px solid var(--accent-color);
+    box-shadow: var(--neon-shadow);
 }
 
-nav ul {
-    list-style: none;
-    padding: 0;
+header h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    color: var(--accent-color);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+}
+
+nav {
+    margin: 2rem auto;
+    width: 90%;
+    max-width: 1200px;
+}
+
+/* Estilo de Tarjetas */
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 1rem;
+}
+
+.game-card {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 2rem;
     text-align: center;
-    background-color: #555;
-    margin: 0;
-}
-
-nav ul li {
-    display: inline;
-    margin: 0 15px;
-}
-
-nav ul li a {
-    color: #fff;
+    border: 1px solid #30363d;
+    transition: all 0.3s ease;
     text-decoration: none;
-    padding: 10px 0;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.game-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--accent-color);
+    box-shadow: 0 10px 30px rgba(0, 255, 136, 0.2);
+}
+
+.game-card h2 {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--secondary-accent);
+    margin-bottom: 1rem;
+}
+
+.game-card p {
+    font-size: 0.9rem;
+    color: #8b949e;
+    margin-bottom: 1.5rem;
+}
+
+.play-button {
+    background: var(--accent-color);
+    color: var(--bg-color);
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: bold;
+    text-transform: uppercase;
     display: inline-block;
 }
 
-nav ul li a:hover {
-    background-color: #777;
-}
-
+/* Ajustes para los contenedores de juego */
 main {
-    padding: 20px;
-    text-align: center;
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-footer {
-    background-color: #333;
-    color: #fff;
-    text-align: center;
-    padding: 1rem 0;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-}
-
-/* Triki game specific styles */
-.triki-board {
-    border-collapse: collapse;
-    margin: 20px auto; /* Centers the board */
-    display: inline-block; /* To allow auto margin to center it */
-}
-
-.triki-board td {
-    width: 80px;
-    height: 80px;
-    border: 2px solid #333;
-    text-align: center;
-    vertical-align: middle;
-    font-size: 3em;
-    font-weight: bold;
+button {
+    background: var(--card-bg);
+    color: var(--accent-color);
+    border: 1px solid var(--accent-color);
+    padding: 10px 20px;
+    border-radius: 5px;
     cursor: pointer;
-    background-color: #eee;
+    font-family: 'Orbitron', sans-serif;
+    transition: 0.3s;
 }
 
-.triki-board td:hover {
-    background-color: #ddd;
-}
-
-.triki-board td.player-x {
-    color: #e74c3c; /* Red */
-}
-
-.triki-board td.player-o {
-    color: #3498db; /* Blue */
+button:hover {
+    background: var(--accent-color);
+    color: var(--bg-color);
+    box-shadow: var(--neon-shadow);
 }
 
 #game-status {
-    margin-top: 10px;
-    font-size: 1.2em;
+    margin: 1rem 0;
+    font-size: 1.2rem;
     font-weight: bold;
+    color: var(--secondary-accent);
 }
 
-#new-game-button {
-    padding: 10px 20px;
-    font-size: 1.2em;
-    cursor: pointer;
-    margin-top: 20px;
+footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.8rem;
+    color: #484f58;
 }
