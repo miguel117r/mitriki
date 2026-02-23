@@ -29,6 +29,8 @@ function start(m) {
     requestAnimationFrame(update);
 }
 
+const WINNING_SCORE = 10;
+
 function resetBall() {
     ball.x = canvas.width / 2;
     ball.y = canvas.height / 2;
@@ -36,9 +38,22 @@ function resetBall() {
     ball.dy = (Math.random() > 0.5 ? 3 : -3);
 }
 
+function checkWinner() {
+    if (player1.score >= WINNING_SCORE) {
+        gameRunning = false;
+        status.textContent = "¡JUGADOR 1 GANA LA PARTIDA! 🎉";
+        status.style.color = "#4caf50";
+    } else if (player2.score >= WINNING_SCORE) {
+        gameRunning = false;
+        status.textContent = mode === 'ia' ? "¡LA IA GANA LA PARTIDA! 🤖" : "¡JUGADOR 2 GANA LA PARTIDA! 🎉";
+        status.style.color = "#f44336";
+    }
+}
+
 function update() {
     if (!gameRunning) return;
 
+    // ... (movimientos de paletas iguales)
     // Movimiento Jugador 1 (W/S)
     if (keys['KeyW'] && player1.y > 0) player1.y -= 5;
     if (keys['KeyS'] && player1.y < canvas.height - paddleHeight) player1.y += 5;
@@ -48,7 +63,6 @@ function update() {
         if (keys['ArrowUp'] && player2.y > 0) player2.y -= 5;
         if (keys['ArrowDown'] && player2.y < canvas.height - paddleHeight) player2.y += 5;
     } else {
-        // IA simple: sigue la pelota con un pequeño retraso para que no sea imbatible
         const target = ball.y - paddleHeight / 2;
         if (player2.y < target) player2.y += 3.5;
         if (player2.y > target) player2.y -= 3.5;
@@ -58,12 +72,11 @@ function update() {
     ball.x += ball.dx;
     ball.y += ball.dy;
 
-    // Rebote Techo/Suelo
+    // Rebotes y Goles
     if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) ball.dy *= -1;
 
-    // Rebote Paletas
     if (ball.x - ball.radius < player1.x + paddleWidth && ball.y > player1.y && ball.y < player1.y + paddleHeight) {
-        ball.dx *= -1.1; // Aumenta velocidad poco a poco
+        ball.dx *= -1.1;
         ball.x = player1.x + paddleWidth + ball.radius;
     }
     if (ball.x + ball.radius > player2.x && ball.y > player2.y && ball.y < player2.y + paddleHeight) {
@@ -71,12 +84,19 @@ function update() {
         ball.x = player2.x - ball.radius;
     }
 
-    // Goles
-    if (ball.x < 0) { player2.score++; resetBall(); }
-    if (ball.x > canvas.width) { player1.score++; resetBall(); }
+    if (ball.x < 0) { 
+        player2.score++; 
+        resetBall(); 
+        checkWinner();
+    }
+    if (ball.x > canvas.width) { 
+        player1.score++; 
+        resetBall(); 
+        checkWinner();
+    }
 
     draw();
-    requestAnimationFrame(update);
+    if (gameRunning) requestAnimationFrame(update);
 }
 
 function draw() {
