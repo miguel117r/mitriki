@@ -152,5 +152,6 @@ def serve_static(path):
     return send_from_directory(frontend_dir, path)
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
+    # Usar puerto de Render o 10000 por defecto (Render usa 10000 frecuentemente)
+    port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
