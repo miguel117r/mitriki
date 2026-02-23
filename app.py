@@ -1,16 +1,11 @@
-# triki_microservice/app.py
 import os
 import uuid
 import random
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
-# Rutas absolutas
-current_dir = os.path.dirname(os.path.abspath(__file__))
-frontend_dir = os.path.join(current_dir, 'web_frontend')
-
-# Configuramos Flask para que sirva TODO desde web_frontend automáticamente
-app = Flask(__name__, static_folder=frontend_dir, static_url_path='')
+# Configuración básica
+app = Flask(__name__, static_folder='web_frontend', static_url_path='')
 CORS(app) 
 
 games = {}
@@ -26,34 +21,25 @@ class TrikiGameLogic:
 
     def make_move(self, row, col, player):
         if self.game_over or self.board[row][col] != "" or player != self.current_player:
-            return False, "Movimiento inválido"
-        
+            return False
         self.board[row][col] = player
         if self._check_winner(player):
+            self.game_over, self.winner = True, player
+        elif all(self.board[i][j] != "" for i in range(3) for j in range(3)):
             self.game_over = True
-            self.winner = player
-            return True, "Ganaste"
-        
-        if all(self.board[i][j] != "" for i in range(3) for j in range(3)):
-            self.game_over = True
-            return True, "Empate"
-
-        self.current_player = "O" if player == "X" else "X"
-        if self.mode == 'ia' and self.current_player == "O" and not self.game_over:
-            self._ai_move()
-        return True, "Ok"
+        else:
+            self.current_player = "O" if player == "X" else "X"
+            if self.mode == 'ia' and self.current_player == "O":
+                self._ai_move()
+        return True
 
     def _ai_move(self):
         empty = [(r, c) for r in range(3) for c in range(3) if self.board[r][c] == ""]
         if empty:
-            r, c = random.choice(empty)
-            self.board[r][c] = "O"
-            if self._check_winner("O"):
-                self.game_over, self.winner = True, "O"
-            elif all(self.board[i][j] != "" for i in range(3) for j in range(3)):
-                self.game_over = True
-            else:
-                self.current_player = "X"
+            r, c = random.choice(empty); self.board[r][c] = "O"
+            if self._check_winner("O"): self.game_over, self.winner = True, "O"
+            elif all(self.board[i][j] != "" for i in range(3) for j in range(3)): self.game_over = True
+            else: self.current_player = "X"
 
     def _check_winner(self, p):
         for i in range(3):
@@ -87,8 +73,7 @@ class MinesweeperGameLogic:
     def _recursive_reveal(self, r, c):
         if not (0 <= r < self.rows and 0 <= c < self.cols) or self.visible[r][c] != "hidden": return
         adj = sum(1 for dr in [-1,0,1] for dc in [-1,0,1] if (r+dr, c+dc) in self.mines)
-        self.visible[r][c] = "revealed"
-        self.board[r][c] = str(adj)
+        self.visible[r][c] = "revealed"; self.board[r][c] = str(adj)
         if adj == 0:
             for dr in [-1,0,1]:
                 for dc in [-1,0,1]:
@@ -109,21 +94,19 @@ class MinesweeperGameLogic:
 # --- API ---
 @app.route('/api/triki/new_game', methods=['POST'])
 def triki_new():
-    data = request.json or {}; mode = data.get('mode', 'pvp')
-    gid = str(uuid.uuid4()); games[gid] = TrikiGameLogic(mode)
+    data = request.json or {}; gid = str(uuid.uuid4())
+    games[gid] = TrikiGameLogic(data.get('mode', 'pvp'))
     return jsonify({"game_id": gid, "initial_state": games[gid].get_state()}), 201
 
 @app.route('/api/triki/<gid>/state', methods=['GET'])
 def triki_state(gid):
-    g = games.get(gid)
-    return jsonify(g.get_state()) if g else (jsonify({"error": "No encontrado"}), 404)
+    g = games.get(gid); return jsonify(g.get_state()) if g else ({}, 404)
 
 @app.route('/api/triki/<gid>/move', methods=['POST'])
 def triki_move(gid):
     g = games.get(gid); data = request.json
-    if not g: return jsonify({"error": "No encontrado"}), 404
-    g.make_move(data.get('row'), data.get('col'), data.get('player'))
-    return jsonify({"new_state": g.get_state()}), 200
+    if g: g.make_move(data.get('row'), data.get('col'), data.get('player'))
+    return jsonify({"new_state": g.get_state()}) if g else ({}, 404)
 
 @app.route('/api/minesweeper/new_game', methods=['POST'])
 def mine_new():
@@ -134,24 +117,20 @@ def mine_new():
 def mine_reveal(gid):
     g = games.get(gid); data = request.json
     if g: g.reveal(data.get('row'), data.get('col'))
-    return jsonify(g.get_state()) if g else (jsonify({"error": "No"}), 404)
+    return jsonify(g.get_state()) if g else ({}, 404)
 
 @app.route('/api/minesweeper/<gid>/flag', methods=['POST'])
 def mine_flag(gid):
     g = games.get(gid); data = request.json
     if g: g.toggle_flag(data.get('row'), data.get('col'))
-    return jsonify(g.get_state()) if g else (jsonify({"error": "No"}), 404)
+    return jsonify(g.get_state()) if g else ({}, 404)
 
-# --- Servir archivos estáticos ---
+# --- Archivos estáticos ---
 @app.route('/')
-def serve_index():
-    return send_from_directory(frontend_dir, 'index.html')
+def index(): return send_from_directory('web_frontend', 'index.html')
 
 @app.route('/<path:path>')
-def serve_static(path):
-    return send_from_directory(frontend_dir, path)
+def static_files(path): return send_from_directory('web_frontend', path)
 
 if __name__ == '__main__':
-    # Usar puerto de Render o 10000 por defecto (Render usa 10000 frecuentemente)
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)))
