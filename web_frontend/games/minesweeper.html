@@ -1,29 +1,45 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Juego - Buscaminas</title>
+    <title>Buscaminas Pro | Multi-Juego</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        .mine-grid { display: grid; gap: 2px; background: #ccc; padding: 5px; margin: 20px auto; width: fit-content; }
-        .cell { width: 30px; height: 30px; background: #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; border: 1px solid #999; }
-        .cell.revealed { background: #fff; cursor: default; }
-        .cell.flagged { background: #ffeb3b; }
-        .cell.mine { background: #f44336; }
-        .cell.n1 { color: blue; } .cell.n2 { color: green; } .cell.n3 { color: red; }
+        .difficulty-menu { margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .diff-btn { padding: 8px 15px; border-radius: 5px; cursor: pointer; border: 1px solid #00ff88; background: #161b22; color: #00ff88; font-family: 'Orbitron', sans-serif; transition: 0.3s; }
+        .diff-btn:hover, .diff-btn.active { background: #00ff88; color: #0b0e14; box-shadow: 0 0 10px #00ff88; }
+        #minesweeper-grid { display: grid; gap: 2px; background: #30363d; padding: 5px; border-radius: 5px; margin: 0 auto; user-select: none; }
+        .cell { width: 30px; height: 30px; background: #21262d; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; font-size: 14px; border-radius: 2px; }
+        .cell:hover { background: #30363d; }
+        .cell.revealed { background: #0d1117; cursor: default; }
+        .cell.mine { background: #f85149; color: white; }
+        .cell.flagged { background: #d29922; color: white; }
+        .cell[data-value="1"] { color: #58a6ff; }
+        .cell[data-value="2"] { color: #3fb950; }
+        .cell[data-value="3"] { color: #f85149; }
+        .cell[data-value="4"] { color: #a371f7; }
+        .status-msg { margin-top: 15px; font-size: 1.2rem; min-height: 1.5rem; }
+        .game-container { max-width: 100%; overflow-x: auto; padding: 10px; }
     </style>
 </head>
 <body>
     <header>
-        <h1>Buscaminas</h1>
-        <a href="../index.html">Volver al Menú</a>
+        <h1>BUSCAMINAS</h1>
+        <div class="difficulty-menu">
+            <button class="diff-btn active" onclick="startGame('facil')">Fácil</button>
+            <button class="diff-btn" onclick="startGame('normal')">Normal</button>
+            <button class="diff-btn" onclick="startGame('dificil')">Difícil</button>
+            <button class="diff-btn" onclick="startGame('imposible')">Imposible</button>
+        </div>
     </header>
-    <main>
-        <div id="game-status">Haz clic en "Nueva Partida" para empezar.</div>
-        <button id="new-game-button">Nueva Partida</button>
-        <div id="mine-board-container" class="mine-grid"></div>
+
+    <main class="game-container">
+        <div id="minesweeper-grid"></div>
+        <div id="status" class="status-msg"></div>
+        <a href="../index.html" class="play-button" style="margin-top: 20px; text-decoration: none;">Volver al Menú</a>
     </main>
+
     <script src="../js/minesweeper.js"></script>
 </body>
 </html>
