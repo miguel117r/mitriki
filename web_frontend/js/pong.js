@@ -7,9 +7,9 @@ const WINNING_SCORE = 10;
 let gameRunning = false;
 let mode = 'ia'; 
 
-// Ajuste de velocidad: Inicial más lenta (3 en lugar de 4)
-const ball = { x: 400, y: 200, dx: 3, dy: 3, radius: 10, speedLimit: 7 };
-const paddleWidth = 12, paddleHeight = 90; // Paletas un poco más grandes para mejor control
+// Ajuste Fino: Velocidad inicial reducida a 3.0. Límite bajado a 5.5.
+const ball = { x: 400, y: 200, dx: 3, dy: 3, radius: 10, speedLimit: 5.5 };
+const paddleWidth = 12, paddleHeight = 90;
 const player1 = { x: 0, y: 155, score: 0 };
 const player2 = { x: canvas.width - paddleWidth, y: 155, score: 0 };
 
@@ -56,8 +56,8 @@ function start(m) {
 function resetBall() {
     ball.x = canvas.width / 2;
     ball.y = canvas.height / 2;
-    // Velocidad inicial controlada
-    const startSpeed = 3.5;
+    // Velocidad inicial suave para PVP
+    const startSpeed = 3.0;
     ball.dx = (Math.random() > 0.5 ? startSpeed : -startSpeed);
     ball.dy = (Math.random() > 0.5 ? startSpeed - 0.5 : -(startSpeed - 0.5));
 }
@@ -77,7 +77,6 @@ function checkWinner() {
 function update() {
     if (!gameRunning) return;
 
-    // Movimiento paletas: Velocidad ajustada a 7 para mejor reacción
     const paddleSpeed = 7;
     if ((keys['KeyW'] || keys['TouchP1Up']) && player1.y > 0) player1.y -= paddleSpeed;
     if ((keys['KeyS'] || keys['TouchP1Down']) && player1.y < canvas.height - paddleHeight) player1.y += paddleSpeed;
@@ -86,9 +85,9 @@ function update() {
         if (keys['ArrowUp'] && player2.y > 0) player2.y -= paddleSpeed;
         if (keys['ArrowDown'] && player2.y < canvas.height - paddleHeight) player2.y += paddleSpeed;
     } else {
-        // IA más equilibrada: No es perfecta
+        // IA ajustada (reducción del 5% en velocidad de seguimiento)
         const target = ball.y - paddleHeight / 2;
-        const aiSpeed = 4.5; // Un poco más lenta que el jugador
+        const aiSpeed = 4.2; 
         if (player2.y < target - 10) player2.y += aiSpeed;
         if (player2.y > target + 10) player2.y -= aiSpeed;
     }
@@ -96,11 +95,10 @@ function update() {
     ball.x += ball.dx;
     ball.y += ball.dy;
 
-    // Rebote superior/inferior
     if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) ball.dy *= -1;
 
-    // Rebote paletas con limitador de velocidad (Max speedLimit)
-    const accel = 1.04; // Aceleración más suave
+    // Aceleración mucho más lenta (1.02)
+    const accel = 1.02; 
     if (ball.x - ball.radius < player1.x + paddleWidth && ball.y > player1.y && ball.y < player1.y + paddleHeight) {
         ball.dx = Math.min(Math.abs(ball.dx * accel), ball.speedLimit);
         ball.x = player1.x + paddleWidth + ball.radius;
@@ -120,7 +118,6 @@ function update() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Red de en medio
     ctx.setLineDash([10, 10]);
     ctx.strokeStyle = 'rgba(0, 255, 136, 0.2)';
     ctx.beginPath();
@@ -128,7 +125,6 @@ function draw() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Paletas con estilo Neón
     ctx.fillStyle = '#00ff88';
     ctx.shadowBlur = 10; ctx.shadowColor = '#00ff88';
     ctx.fillRect(player1.x, player1.y, paddleWidth, paddleHeight);
@@ -136,7 +132,6 @@ function draw() {
     ctx.shadowColor = '#00d4ff';
     ctx.fillRect(player2.x, player2.y, paddleWidth, paddleHeight);
 
-    // Bola blanca brillante
     ctx.fillStyle = '#fff';
     ctx.shadowBlur = 15; ctx.shadowColor = '#fff';
     ctx.beginPath();
@@ -144,7 +139,6 @@ function draw() {
     ctx.fill();
     ctx.shadowBlur = 0;
 
-    // Marcadores
     ctx.font = 'bold 30px Orbitron';
     ctx.fillStyle = '#00ff88';
     ctx.fillText(player1.score, 200, 50);
