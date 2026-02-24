@@ -1,43 +1,47 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Triki Online | Multi-Juego</title>
+    <title>Triki Online & IA | Multi-Juego</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
-        .online-controls { background: #161b22; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #30363d; }
-        input { padding: 10px; border-radius: 5px; border: 1px solid #30363d; background: #0b0e14; color: white; margin-right: 10px; width: 100px; text-align: center; font-size: 18px; }
-        .triki-board td { width: 100px; height: 100px; text-align: center; font-size: 50px; border: 2px solid #30363d; cursor: pointer; transition: 0.3s; }
-        .triki-board td:hover { background: #1c2128; }
-        .player-x { color: #00d4ff; text-shadow: 0 0 10px rgba(0,212,255,0.5); }
-        .player-o { color: #00ff88; text-shadow: 0 0 10px rgba(0,255,136,0.5); }
-        .info-panel { margin: 15px 0; font-family: 'Orbitron', sans-serif; font-size: 1.1rem; }
+        .triki-board { display: grid; grid-template-columns: repeat(3, 100px); grid-template-rows: repeat(3, 100px); gap: 10px; margin-top: 20px; }
+        .cell { width: 100px; height: 100px; background: #161b22; border: 2px solid #30363d; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 48px; font-family: 'Orbitron', sans-serif; cursor: pointer; transition: 0.3s; color: #00ff88; }
+        .cell:hover { border-color: #00ff88; transform: scale(1.05); }
+        .setup-screen { display: flex; flex-direction: column; gap: 15px; max-width: 300px; margin-top: 50px; }
+        .info-panel { margin-top: 20px; text-align: center; }
+        input { padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; }
+        .btn-ia { background: #00d4ff; color: #0b0e14; border: none; padding: 10px; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
     <header>
-        <h1>Triki Online</h1>
-        <a href="../index.html" style="color: #4caf50;">Volver al Menú</a>
+        <h1>TRIKI</h1>
     </header>
 
-    <main>
-        <div class="online-controls">
-            <button id="btn-create">Crear Sala</button>
-            <span style="margin: 0 15px; color: #8b949e;">O</span>
-            <input type="text" id="input-room" placeholder="Código">
-            <button id="btn-join">Unirse</button>
+    <main style="display: flex; flex-direction: column; align-items: center;">
+        <div id="setup" class="setup-screen">
+            <button class="btn-ia" onclick="createAIGame()">🤖 Jugar contra la IA</button>
+            <hr style="width: 100%; border: 0.5px solid #30363d;">
+            <button onclick="createRoom()">➕ Crear Sala Privada</button>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="room-input" placeholder="Código de sala">
+                <button onclick="joinRoom()">Unirse</button>
+            </div>
         </div>
 
-        <div class="info-panel">
-            <div id="room-display" style="color: #00d4ff;">Sala: -</div>
-            <div id="role-display">Rol: -</div>
-            <div id="score-display" style="font-size: 1.5rem; color: #ffeb3b; margin: 10px 0;">X: 0 | O: 0</div>
-            <div id="game-status">Crea o únete a una sala para jugar.</div>
-            <button id="btn-restart" style="display:none; background: #4caf50; color: white; margin-top: 10px;">¡Revancha! (Nueva Partida)</button>
+        <div id="game-view" style="display: none;">
+            <div class="info-panel">
+                <p id="room-info" style="color: #00d4ff;"></p>
+                <p id="turn-info" style="font-size: 24px; margin: 10px 0;"></p>
+                <p id="scores" style="color: #8b949e;"></p>
+            </div>
+            <div class="triki-board" id="board"></div>
+            <button id="restart-btn" style="margin-top: 20px; display: none;" onclick="restartGame()">Reiniciar Partida</button>
         </div>
 
-        <div id="triki-board-container"></div>
+        <a href="../index.html" class="play-button" style="margin-top: 30px; text-decoration: none;">Volver al Menú</a>
     </main>
 
     <script src="../js/online-triki.js"></script>
