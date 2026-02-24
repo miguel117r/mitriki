@@ -1,23 +1,28 @@
-﻿// pong.js
-const canvas = document.getElementById('pongCanvas');
+﻿const canvas = document.getElementById('pongCanvas');
 const ctx = canvas.getContext('2d');
 const status = document.getElementById('game-status');
+const diffSelect = document.getElementById('difficulty-select');
 
 const WINNING_SCORE = 10;
 let gameRunning = false;
+let animationId = null; // Para evitar el bug de velocidad acumulada
 let mode = 'ia'; 
 
-// AJUSTE EXTREMO DE LENTITUD: dx/dy = 2.0, límite = 4.0
-const ball = { x: 400, y: 200, dx: 2, dy: 2, radius: 10, speedLimit: 4.0 };
+const ball = { x: 400, y: 200, dx: 0, dy: 0, radius: 10, speedLimit: 6 };
 const paddleWidth = 12, paddleHeight = 90;
 const player1 = { x: 0, y: 155, score: 0 };
 const player2 = { x: canvas.width - paddleWidth, y: 155, score: 0 };
+
+const diffSettings = {
+    lento: { ballSpeed: 2, aiSpeed: 3, limit: 4 },
+    normal: { ballSpeed: 3.5, aiSpeed: 4.5, limit: 6 },
+    rapido: { ballSpeed: 5, aiSpeed: 6.5, limit: 9 }
+};
 
 const keys = {};
 window.addEventListener('keydown', e => keys[e.code] = true);
 window.addEventListener('keyup', e => keys[e.code] = false);
 
-// Controles Táctiles
 canvas.addEventListener('touchstart', handleTouch, {passive: false});
 canvas.addEventListener('touchmove', handleTouch, {passive: false});
 canvas.addEventListener('touchend', () => {
@@ -45,18 +50,23 @@ function start(m) {
     gameRunning = true;
     player1.score = player2.score = 0;
     player1.y = player2.y = (canvas.height - paddleHeight) / 2;
+    
+    // IMPORTANTE: Cancelar cualquier bucle anterior para evitar que la velocidad aumente
+    if (animationId) cancelAnimationFrame(animationId);
+    
     resetBall();
     status.textContent = mode === 'ia' ? "vs Computadora" : "MODO 2 JUGADORES";
     status.style.color = "#00ff88";
-    requestAnimationFrame(update);
+    animationId = requestAnimationFrame(update);
 }
 
 function resetBall() {
+    const config = diffSettings[diffSelect.value];
     ball.x = canvas.width / 2;
     ball.y = canvas.height / 2;
-    const startSpeed = 2.0; // Velocidad de inicio muy baja
-    ball.dx = (Math.random() > 0.5 ? startSpeed : -startSpeed);
-    ball.dy = (Math.random() > 0.5 ? 1.5 : -1.5);
+    ball.dx = (Math.random() > 0.5 ? config.ballSpeed : -config.ballSpeed);
+    ball.dy = (Math.random() > 0.5 ? config.ballSpeed * 0.8 : -config.ballSpeed * 0.8);
+    ball.speedLimit = config.limit;
 }
 
 function checkWinner() {
@@ -72,7 +82,9 @@ function checkWinner() {
 function update() {
     if (!gameRunning) return;
 
+    const config = diffSettings[diffSelect.value];
     const paddleSpeed = 7;
+
     if ((keys['KeyW'] || keys['TouchP1Up']) && player1.y > 0) player1.y -= paddleSpeed;
     if ((keys['KeyS'] || keys['TouchP1Down']) && player1.y < canvas.height - paddleHeight) player1.y += paddleSpeed;
 
@@ -81,9 +93,8 @@ function update() {
         if (keys['ArrowDown'] && player2.y < canvas.height - paddleHeight) player2.y += paddleSpeed;
     } else {
         const target = ball.y - paddleHeight / 2;
-        const aiSpeed = 3.5; // IA más lenta para emparejar con la bola lenta
-        if (player2.y < target - 10) player2.y += aiSpeed;
-        if (player2.y > target + 10) player2.y -= aiSpeed;
+        if (player2.y < target - 10) player2.y += config.aiSpeed;
+        if (player2.y > target + 10) player2.y -= config.aiSpeed;
     }
 
     ball.x += ball.dx;
@@ -91,7 +102,7 @@ function update() {
 
     if (ball.y + ball.radius > canvas.height || ball.y - ball.radius < 0) ball.dy *= -1;
 
-    const accel = 1.01; // Aceleración mínima (1%)
+    const accel = 1.02;
     if (ball.x - ball.radius < player1.x + paddleWidth && ball.y > player1.y && ball.y < player1.y + paddleHeight) {
         ball.dx = Math.min(Math.abs(ball.dx * accel), ball.speedLimit);
         ball.x = player1.x + paddleWidth + ball.radius;
@@ -105,7 +116,7 @@ function update() {
     if (ball.x > canvas.width) { player1.score++; resetBall(); checkWinner(); }
 
     draw();
-    if (gameRunning) requestAnimationFrame(update);
+    if (gameRunning) animationId = requestAnimationFrame(update);
 }
 
 function draw() {
