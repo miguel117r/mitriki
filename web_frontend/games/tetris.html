@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris | Multi-Juego</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .game-container { text-align: center; margin-top: 20px; }
+        #tetris { border: 2px solid #30363d; background-color: #0d1117; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .stats { margin-top: 20px; font-size: 24px; color: #58a6ff; }
+        .controls-info { color: #8b949e; margin-top: 10px; font-size: 0.9em; }
+        .back-btn { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #238636; color: white; text-decoration: none; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>TETRIS</h1>
+        <div class="stats">Puntos: <span id="score">0</span></div>
+    </header>
+    
+    <div class="game-container">
+        <canvas id="tetris" width="240" height="400"></canvas>
+        <div class="controls-info">Usa las flechas para mover y rotar</div>
+        <a href="../index.html" class="back-btn">Volver al Menú</a>
+    </div>
+
+    <script src="../js/tetris.js"></script>
+</body>
+</html>
