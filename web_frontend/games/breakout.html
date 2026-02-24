@@ -3,24 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Breakout | Multi-Juego</title>
+    <title>Breakout Pro | Multi-Juego</title>
     <link rel="stylesheet" href="../css/style.css">
     <style>
         .game-container { text-align: center; margin-top: 20px; }
-        #breakout { border: 2px solid #00ff88; background-color: #0d1117; box-shadow: 0 0 20px rgba(0, 255, 136, 0.2); cursor: none; }
-        .stats { margin-top: 20px; font-size: 24px; color: #00ff88; font-family: 'Orbitron', sans-serif; }
-        .back-btn { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #238636; color: white; text-decoration: none; border-radius: 6px; }
+        #breakout { 
+            border: 4px solid #00ff88; 
+            background-color: #0d1117; 
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4); 
+            cursor: none;
+            max-width: 95%;
+        }
+        .stats { 
+            margin-top: 10px; 
+            font-size: 20px; 
+            color: #00ff88; 
+            font-family: 'Orbitron', sans-serif;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+        .back-btn { 
+            display: inline-block; 
+            margin-top: 15px; 
+            padding: 10px 20px; 
+            background: #238636; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            transition: 0.3s;
+        }
+        .back-btn:hover { background: #2ea043; }
     </style>
 </head>
 <body>
     <header>
-        <h1>BREAKOUT</h1>
-        <div class="stats">Puntos: <span id="score">0</span> | Vidas: <span id="lives">3</span></div>
+        <h1>BREAKOUT PRO</h1>
+        <div class="stats">
+            <div>Nivel: <span id="level">1</span></div>
+            <div>Puntos: <span id="score">0</span></div>
+            <div>Vidas: <span id="lives">3</span></div>
+        </div>
     </header>
     
     <div class="game-container">
-        <canvas id="breakout" width="480" height="320"></canvas>
-        <div style="color: #8b949e; margin-top: 10px;">Mueve el ratón para controlar la paleta</div>
+        <canvas id="breakout" width="800" height="500"></canvas>
+        <div style="color: #8b949e; margin-top: 10px;">
+            Mueve el ratón para jugar • Presiona <b>R</b> para reiniciar
+        </div>
         <a href="../index.html" class="back-btn">Volver al Menú</a>
     </div>
 
