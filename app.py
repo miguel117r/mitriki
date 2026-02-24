@@ -8,8 +8,11 @@ from flask_cors import CORS
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FRONTEND_DIR = os.path.join(BASE_DIR, 'web_frontend')
 
-app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path='')
+app = Flask(__name__, static_folder=FRONTEND_DIR)
 CORS(app)
+
+print(f"--- Servidor Mitriki iniciado ---")
+print(f"Carpeta frontend: {FRONTEND_DIR}")
 
 games = {}
 
@@ -152,10 +155,17 @@ def snk_sc(): return jsonify({"ok": True}), 200
 
 # --- RUTAS FRONTEND ---
 @app.route('/')
-def root(): return send_from_directory(app.static_folder, 'index.html')
+def index():
+    return send_from_directory(FRONTEND_DIR, 'index.html')
 
 @app.route('/<path:path>')
-def serve_static(path): return send_from_directory(app.static_folder, path)
+def static_proxy(path):
+    # Intentar servir el archivo desde FRONTEND_DIR
+    file_path = os.path.join(FRONTEND_DIR, path)
+    if os.path.exists(file_path):
+        return send_from_directory(FRONTEND_DIR, path)
+    # Si no existe, volver al index (útil para SPAs, aunque aquí puede ser opcional)
+    return send_from_directory(FRONTEND_DIR, 'index.html')
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
