@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breakout | Multi-Juego</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .game-container { text-align: center; margin-top: 20px; }
+        #breakout { border: 2px solid #00ff88; background-color: #0d1117; box-shadow: 0 0 20px rgba(0, 255, 136, 0.2); cursor: none; }
+        .stats { margin-top: 20px; font-size: 24px; color: #00ff88; font-family: 'Orbitron', sans-serif; }
+        .back-btn { display: inline-block; margin-top: 20px; padding: 10px 20px; background: #238636; color: white; text-decoration: none; border-radius: 6px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>BREAKOUT</h1>
+        <div class="stats">Puntos: <span id="score">0</span> | Vidas: <span id="lives">3</span></div>
+    </header>
+    
+    <div class="game-container">
+        <canvas id="breakout" width="480" height="320"></canvas>
+        <div style="color: #8b949e; margin-top: 10px;">Mueve el ratón para controlar la paleta</div>
+        <a href="../index.html" class="back-btn">Volver al Menú</a>
+    </div>
+
+    <script src="../js/breakout.js"></script>
+</body>
+</html>
