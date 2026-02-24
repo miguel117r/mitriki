@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,25 @@
         #snake-container { display: flex; flex-direction: column; align-items: center; margin-top: 20px; }
         canvas { background: #0b0e14; border: 3px solid #00ff88; box-shadow: 0 0 20px rgba(0, 255, 136, 0.2); max-width: 95%; height: auto; }
         .score-panel { font-family: 'Orbitron', sans-serif; color: #00ff88; font-size: 24px; margin-bottom: 10px; }
-        .controls-hint { color: #8b949e; margin-top: 10px; font-size: 0.9rem; }
+        
+        /* Controles Móviles */
+        .mobile-controls { display: grid; grid-template-columns: repeat(3, 70px); grid-template-rows: repeat(2, 70px); gap: 10px; margin-top: 20px; }
+        .control-btn { 
+            width: 70px; height: 70px; 
+            background: rgba(22, 27, 34, 0.8); 
+            border: 2px solid #00ff88; 
+            border-radius: 50%; 
+            color: #00ff88; 
+            font-size: 24px; 
+            display: flex; align-items: center; justify-content: center; 
+            cursor: pointer; user-select: none;
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.1);
+        }
+        .control-btn:active { background: #00ff88; color: #0b0e14; box-shadow: 0 0 20px #00ff88; }
+        .up { grid-column: 2; }
+        .left { grid-column: 1; grid-row: 2; }
+        .down { grid-column: 2; grid-row: 2; }
+        .right { grid-column: 3; grid-row: 2; }
     </style>
 </head>
 <body>
@@ -21,8 +39,15 @@
         <div class="score-panel">Puntos: <span id="current-score">0</span> | Récord: <span id="high-score">0</span></div>
         <div id="game-status" style="color: #00d4ff; font-family: 'Orbitron', sans-serif; margin-bottom: 10px; min-height: 24px;"></div>
         <canvas id="snakeCanvas" width="400" height="400"></canvas>
+        
+        <div class="mobile-controls">
+            <div class="control-btn up" onclick="changeDirection('up')">▲</div>
+            <div class="control-btn left" onclick="changeDirection('left')">◀</div>
+            <div class="control-btn down" onclick="changeDirection('down')">▼</div>
+            <div class="control-btn right" onclick="changeDirection('right')">▶</div>
+        </div>
+
         <button id="start-button" style="margin-top: 20px;">Empezar Juego</button>
-        <div class="controls-hint">PC: Flechas | Celular: Desliza el dedo</div>
     </main>
     <script src="../js/snake.js"></script>
 </body>
