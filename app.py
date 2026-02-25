@@ -154,6 +154,10 @@ def ms_fl(gid):
 def snk_sc(): return jsonify({"ok": True}), 200
 
 # --- RUTAS FRONTEND ---
+@app.route('/health')
+def health_check():
+    return jsonify({"status": "healthy"}), 200
+
 @app.route('/')
 def index():
     return send_from_directory(FRONTEND_DIR, 'index.html')
@@ -161,10 +165,14 @@ def index():
 @app.route('/<path:path>')
 def static_proxy(path):
     # Intentar servir el archivo desde FRONTEND_DIR
-    file_path = os.path.join(FRONTEND_DIR, path)
-    if os.path.exists(file_path):
+    full_path = os.path.join(FRONTEND_DIR, path)
+    if os.path.isfile(full_path):
         return send_from_directory(FRONTEND_DIR, path)
-    # Si no existe, volver al index (útil para SPAs, aunque aquí puede ser opcional)
+    
+    # Si es una carpeta de juego o ruta desconocida, intentar buscar el .html o volver al index
+    if not path.endswith('.html') and os.path.isfile(full_path + '.html'):
+        return send_from_directory(FRONTEND_DIR, path + '.html')
+        
     return send_from_directory(FRONTEND_DIR, 'index.html')
 
 if __name__ == '__main__':
